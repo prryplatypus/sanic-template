@@ -1,4 +1,4 @@
-import asyncio
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 pool = Database(config.DATABASE_URL)
 
 
-def init(app: "App") -> None:
+def init(app: App) -> None:
     @app.before_server_start
     async def _(*_):
         await pool.connect()

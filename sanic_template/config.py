@@ -25,5 +25,11 @@ class Config(_Config):
         self.DATABASE_URL = _DatabaseURL(self.DATABASE_URL)
         self.JWT_SECRET = _b64decode(self.JWT_SECRET, validate=True)
 
+        self.MOTD_DISPLAY.update(
+            {
+                __package__: f"{self.APP_VERSION} ({self.ENVIRONMENT})",
+            }
+        )
+
 
 config = Config(env_prefix=ENV_PREFIX)

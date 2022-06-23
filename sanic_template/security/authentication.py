@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
 import jwt
-from sanic import Request
 from sanic.exceptions import Unauthorized
 
 from sanic_template.constants import JWT_ALGORITHM
-from sanic_template.database import pool
+from sanic_template.request import Request
 
 from .registry import handlers_auth
 
@@ -45,13 +43,13 @@ async def do_checks(request: Request, handler: Callable) -> None:
         and auth_header[0] in allowed_prefixes
     ):
         _, _token = auth_header
-        app: App = request.app
+        app = request.app
         _secret = app.config.JWT_SECRET
 
         try:
             token = jwt.api_jwt.decode_complete(
                 _token,
-                _secret,
+                _secret,  # type: ignore # see pyjwt issue 602
                 algorithms=[JWT_ALGORITHM],
                 audience=[app.config.JWT_AUDIENCE],
                 options={"require": ["iat", "sub"]},
