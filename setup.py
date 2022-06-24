@@ -23,16 +23,15 @@ with open_local(["sanic_template", "__version__.py"], encoding="latin1") as fp:
 setup(
     name='sanic_template',
     version=version,
-    description='Your project\'s description',
-    author='You',
-    author_email='email@example.com',
+    description='A template for projects based on Sanic',
+    author='prryplatypus',
+    author_email='github@prryplatypus.dev',
     packages=find_packages(),
     install_requires=[
-        'cerberus',  # Used for validation
-        'databases[mysql]',  # Database support; replace "mysql" with whichever DB
-        'pyjwt[crypto]',  # Used for authentication (JWT)
+        'cerberus',  # Validation
+        'databases',  # Database
         'sanic',
-        'sanic-ext',  # Adds stuff like OpenAPI support, entity injection, etc...
+        'sanic-ext',
     ],
     extras_require={
         'dev': [

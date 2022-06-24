@@ -12,7 +12,9 @@ def query_args(
     require_all: bool = False,
 ) -> Callable:
     validator: BareValidator = Validator(  # type: ignore
-        schema if schema is not None else {}, require_all=require_all
+        schema if schema is not None else {},
+        allow_unknown=True,
+        require_all=require_all,
     )
 
     def vd(f):
@@ -21,6 +23,7 @@ def query_args(
             validation_passed = validator.validate(
                 dict(request.get_query_args(keep_blank_values=True)),
             )
+
             if not validation_passed:
                 raise InvalidUsage("Invalid querystring values")
 

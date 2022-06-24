@@ -1,17 +1,20 @@
+from __future__ import annotations
+
+from importlib import import_module
+from typing import Optional, Sequence, cast
+
 from sanic import Sanic
+from sanic.exceptions import SanicException
 
-import sanic_template.blueprints as blueprints
 import sanic_template.config as config
-import sanic_template.database as database
-import sanic_template.extensions as extensions
 import sanic_template.request as request
-import sanic_template.security as security
+from sanic_template.constants import APP_NAME, ENV_PREFIX
 
-_init_modules = (
-    blueprints,
-    database,
-    security,  # Must be BEFORE extensions. See note in security/__init__.py.
-    extensions,
+DEFAULT_MODULES = (
+    "sanic_template.blueprints",
+    "sanic_template.database",
+    "sanic_template.security",  # Must be BEFORE extensions. See note in security/__init__.py.
+    "sanic_template.extensions",
 )
 
 
@@ -19,16 +22,30 @@ class App(Sanic):
     config: config.Config
     request: request.Request
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            *args,
-            config=config.config,
+    @classmethod
+    def get_app(
+        cls, name: Optional[str] = None, *, force_create: bool = False
+    ) -> App:
+        return cast(App, super().get_app(name, force_create=force_create))
+
+
+def create(module_names: Optional[Sequence[str]] = None) -> App:
+    try:
+        app = App.get_app(APP_NAME)
+    except SanicException:
+        app = App(
+            APP_NAME,
+            config=config.Config(env_prefix=ENV_PREFIX),
             request_class=request.Request,
-            **kwargs
+            strict_slashes=True,
         )
 
-        for module in _init_modules:
-            module.init(app)
+    if module_names is None:
+        module_names = DEFAULT_MODULES
 
+    for module_name in module_names:
+        module = import_module(module_name)
+        if bp := getattr(module, "bp", None):
+            app.blueprint(bp)
 
-app = App(__package__, strict_slashes=True)
+    return app
